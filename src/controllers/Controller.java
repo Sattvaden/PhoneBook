@@ -32,6 +32,21 @@ public class Controller implements Initializable{
     Parent modalRoot;
 
     Person selectedPerson;
+
+    ResourceBundle resourceBundle;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        resourceBundle = resources;
+        initLoader();
+        nameColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("phone"));
+        model.fillList();
+        contacts.setText("contacts: " + model.getList().size());
+        mainTable.setItems(model.getList());
+        initListeners();
+    }
+
     public void initLoader(){
 
         try {
@@ -55,12 +70,11 @@ public class Controller implements Initializable{
     private TableView mainTable;
     @FXML
     public void initialize(){
-        initLoader();
-        nameColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
-        phoneColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("phone"));
-        model.fillList();
-        contacts.setText("contacts: " + model.getList().size());
-        mainTable.setItems(model.getList());
+
+
+    }
+
+    private void initListeners() {
         model.getList().addListener(new ListChangeListener<Person>() {
             @Override
             public void onChanged(Change<? extends Person> c) {
@@ -78,7 +92,6 @@ public class Controller implements Initializable{
                 }
             }
         });
-
     }
 
     public void openModalWindow(Window owner){
@@ -146,9 +159,5 @@ public class Controller implements Initializable{
         }
     }
 
-    ResourceBundle resourceBundle;
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        resourceBundle = resources;
-    }
+
 }

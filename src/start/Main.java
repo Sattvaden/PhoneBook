@@ -17,9 +17,10 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("../fxml/main.fxml"));
         loader.setResources(ResourceBundle.getBundle("bundles.Locale", new Locale("ru")));
         Parent root = loader.load();
-
+        primaryStage.setMinWidth(330);
+        primaryStage.setMaxHeight(520);
         primaryStage.setTitle("Hello World");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setScene(new Scene(root, 330, 520));
         primaryStage.show();
     }
 
