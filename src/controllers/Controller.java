@@ -5,6 +5,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,8 +21,10 @@ import objects.Person;
 
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable{
 
     Stage stage;
     ModalController modalController;
@@ -61,7 +64,7 @@ public class Controller {
         model.getList().addListener(new ListChangeListener<Person>() {
             @Override
             public void onChanged(Change<? extends Person> c) {
-                contacts.setText("contacts: " + model.getList().size());
+                contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
             }
         });
         mainTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -143,4 +146,9 @@ public class Controller {
         }
     }
 
+    ResourceBundle resourceBundle;
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        resourceBundle = resources;
+    }
 }
