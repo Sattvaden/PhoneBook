@@ -1,6 +1,9 @@
 package controllers;
 
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,15 +19,21 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import objects.Lang;
 import objects.Model;
 import objects.Person;
+import org.controlsfx.control.textfield.CustomTextField;
+import org.controlsfx.control.textfield.TextFields;
+import utils.DialogManager;
+import utils.LocaleManager;
 
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.*;
 
-public class Controller implements Initializable{
+public class Controller extends java.util.Observable implements Initializable{
 
     Stage stage;
     ModalController modalController;
@@ -35,31 +44,66 @@ public class Controller implements Initializable{
 
     ResourceBundle resourceBundle;
 
+    ObservableList<Person> copy;
+
+    private static final String RU_CODE = "ru";
+    private static final String EN_CODE = "en";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setupClearButtonField(searchText);
         resourceBundle = resources;
         initLoader();
         nameColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
         phoneColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("phone"));
         model.fillList();
-        contacts.setText("contacts: " + model.getList().size());
+//        model.getList().addListener(new ListChangeListener<Person>() {
+//            @Override
+//            public void onChanged(Change<? extends Person> c) {
+//                Collections.sort(model.getList(), new Comparator<Person>() {
+//                    @Override
+//                    public int compare(Person o1, Person o2) {
+//                        String name1 = o1.getName();
+//                        String name2 = o2.getName();
+//                       return name1.compareTo(name2);
+//                    }
+//                });
+//            }
+//        });
+        copy = FXCollections.observableArrayList();
+        contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
         mainTable.setItems(model.getList());
         initListeners();
+        fillLangComboBox();
     }
 
+    private void fillLangComboBox(){
+        Lang langRU = new Lang(1, RU_CODE, resourceBundle.getString("ru"), LocaleManager.RU_LOCALE);
+        Lang langEN = new Lang(0, EN_CODE, resourceBundle.getString("en"), LocaleManager.EN_LOCALE);
+
+        comboLocales.getItems().add(langEN);
+        comboLocales.getItems().add(langRU);
+
+        if (LocaleManager.getCurrentLang() == null){
+            comboLocales.getSelectionModel().select(0);
+        }else {
+            comboLocales.getSelectionModel().select(LocaleManager.getCurrentLang().getIndex());
+        }
+    }
     public void initLoader(){
 
         try {
             loader.setLocation(getClass().getResource("../fxml/modal.fxml"));
+            loader.setResources(ResourceBundle.getBundle("bundles.Locale", new Locale("ru")));
             modalRoot = loader.load();
             modalController = loader.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    Model model = new Model();
+    Model model = Model.getInstance();
     @FXML
-    private TextField searchText;
+    private CustomTextField searchText;
     @FXML
     private Label contacts;
     @FXML
@@ -69,16 +113,22 @@ public class Controller implements Initializable{
     @FXML
     private TableView mainTable;
     @FXML
-    public void initialize(){
+    private ComboBox comboLocales;
 
-
-    }
 
     private void initListeners() {
+
+        searchText.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (searchText.getText().equals(""))
+                mainTable.setItems(model.getList());
+            System.out.println("textfield changed from " + oldValue + " to " + newValue);
+        });
+
         model.getList().addListener(new ListChangeListener<Person>() {
             @Override
             public void onChanged(Change<? extends Person> c) {
                 contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
+                mainTable.sort();
             }
         });
         mainTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -89,7 +139,17 @@ public class Controller implements Initializable{
                     selectedPerson = (Person)mainTable.getSelectionModel().getSelectedItem();
                     modalController.setPerson(selectedPerson);
                     openModalWindow(owner);
+                    mainTable.getSelectionModel().clearSelection();
                 }
+            }
+        });
+        comboLocales.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Lang selectedLang = (Lang) comboLocales.getSelectionModel().getSelectedItem();
+                LocaleManager.setCurrentLang(selectedLang);
+                setChanged();
+                notifyObservers(selectedLang);
             }
         });
     }
@@ -98,7 +158,7 @@ public class Controller implements Initializable{
         if (stage == null){
             stage = new Stage();
             stage.setResizable(false);
-            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initModality(Modality.WINDOW_MODAL);
             stage.setScene(new Scene(modalRoot));
             stage.initOwner(owner);
         }
@@ -120,33 +180,51 @@ public class Controller implements Initializable{
                     modalController.setPerson(new Person());
                     model.getList().add(modalController.getPerson());
                     openModalWindow(owner);
-                    mainTable.getSelectionModel().clearSelection();
                     break;
                 case "editButton":
+                    if (selectedPerson == null){
+                        DialogManager.showInfoDialog(resourceBundle.getString("key.alertTitle"),
+                                resourceBundle.getString("key.alertMessage"));
+                        return;
+                    }
                     modalController.setPerson(selectedPerson);
                     openModalWindow(owner);
-                    mainTable.getSelectionModel().clearSelection();
                     break;
                 case "deleteButton":
+                    if (selectedPerson == null){
+                        DialogManager.showInfoDialog(resourceBundle.getString("key.alertTitle"),
+                                resourceBundle.getString("key.alertMessage"));
+                        return;
+                    }
+                    Alert alert = DialogManager.showConfirmDialog(resourceBundle.getString("key.confirmTitle"),
+                            resourceBundle.getString("key.confirmMessage"));
+
+                    if (alert.getResult() == ButtonType.CANCEL){
+                        mainTable.getSelectionModel().clearSelection();
+                        return;
+                    }
                     model.delete(selectedPerson);
-                    mainTable.getSelectionModel().clearSelection();
                     break;
             }
-
+            mainTable.getSelectionModel().clearSelection();
         }catch (RuntimeException e){
             System.out.println("RunTimeException have been chaught");
         }
     }
 
     public void searchAction(ActionEvent actionEvent) {
-        mainTable.getSelectionModel().clearSelection();
-        String name = searchText.getText();
+        ObservableList<Person> temp = FXCollections.observableArrayList();
+        if (searchText.getText().equals("")) {
+           mainTable.setItems(model.getList());
+           return;
+        }
         for (Person p: model.getList()){
-            if(p.getName().toLowerCase().contains(name.toLowerCase())){
-                System.out.println(p.getName());
-                mainTable.getSelectionModel().select(p);
+            if (p.getName().toLowerCase().contains(searchText.getText().toLowerCase()) ||
+                    p.getPhone().toLowerCase().contains(searchText.getText().toLowerCase())){
+                temp.add(p);
             }
         }
+        mainTable.setItems(temp);
     }
 
     public void enterPressed(KeyEvent keyEvent) {
@@ -159,5 +237,15 @@ public class Controller implements Initializable{
         }
     }
 
+    private void setupClearButtonField(CustomTextField customTextField) {
+        try{
+            Method m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class, ObjectProperty.class);
+            m.setAccessible(true);
+            m.invoke(null, customTextField, customTextField.rightProperty());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
 }

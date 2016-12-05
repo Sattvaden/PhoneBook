@@ -5,6 +5,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Model implements PhoneBook{
+
+    private static Model ourInstance = new Model();
+
+    public static Model getInstance() {
+        return ourInstance;
+    }
+
+    private Model() {
+
+    }
     private ObservableList<Person> list = FXCollections.observableArrayList();
 
     public ObservableList<Person> getList() {
