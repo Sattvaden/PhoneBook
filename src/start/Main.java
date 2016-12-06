@@ -15,7 +15,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
 
-public class Main extends Application implements Observer{
+public class Main extends Application implements Observer {
     private static final String FXML_MAIN = "../fxml/main.fxml";
     public static final String BUNDLES_LOCALE = "bundles.Locale";
 
@@ -24,8 +24,10 @@ public class Main extends Application implements Observer{
 
     private Stage primaryStage;
     private VBox currentRoot;
+
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
+
         this.primaryStage = primaryStage;
         createGUI(LocaleManager.EN_LOCALE);
 //        loader = new FXMLLoader();
@@ -38,6 +40,7 @@ public class Main extends Application implements Observer{
 //        primaryStage.setScene(new Scene(root, 330, 520));
 //        primaryStage.show();
     }
+
     private void createGUI(Locale locale) {
         currentRoot = loadFXML(locale);
         Scene scene = new Scene(currentRoot, 300, 275);
@@ -49,14 +52,17 @@ public class Main extends Application implements Observer{
 
     public static void main(String[] args) {
         launch(args);
+
     }
+
 
     @Override
     public void update(Observable o, Object arg) {
-        Lang lang = (Lang)arg;
+        Lang lang = (Lang) arg;
         VBox newNode = loadFXML(lang.getLocal());
         currentRoot.getChildren().setAll(newNode.getChildren());
     }
+
     private VBox loadFXML(Locale locale) {
         loader = new FXMLLoader();
 

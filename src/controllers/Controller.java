@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
-public class Controller extends java.util.Observable implements Initializable{
+public class Controller extends Observable implements Initializable {
 
     Stage stage;
     ModalController modalController;
@@ -57,19 +57,7 @@ public class Controller extends java.util.Observable implements Initializable{
         nameColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("name"));
         phoneColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("phone"));
         model.fillList();
-//        model.getList().addListener(new ListChangeListener<Person>() {
-//            @Override
-//            public void onChanged(Change<? extends Person> c) {
-//                Collections.sort(model.getList(), new Comparator<Person>() {
-//                    @Override
-//                    public int compare(Person o1, Person o2) {
-//                        String name1 = o1.getName();
-//                        String name2 = o2.getName();
-//                       return name1.compareTo(name2);
-//                    }
-//                });
-//            }
-//        });
+
         copy = FXCollections.observableArrayList();
         contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
         mainTable.setItems(model.getList());
@@ -77,20 +65,21 @@ public class Controller extends java.util.Observable implements Initializable{
         fillLangComboBox();
     }
 
-    private void fillLangComboBox(){
+    private void fillLangComboBox() {
         Lang langRU = new Lang(1, RU_CODE, resourceBundle.getString("ru"), LocaleManager.RU_LOCALE);
         Lang langEN = new Lang(0, EN_CODE, resourceBundle.getString("en"), LocaleManager.EN_LOCALE);
 
         comboLocales.getItems().add(langEN);
         comboLocales.getItems().add(langRU);
 
-        if (LocaleManager.getCurrentLang() == null){
+        if (LocaleManager.getCurrentLang() == null) {
             comboLocales.getSelectionModel().select(0);
-        }else {
+        } else {
             comboLocales.getSelectionModel().select(LocaleManager.getCurrentLang().getIndex());
         }
     }
-    public void initLoader(){
+
+    public void initLoader() {
 
         try {
             loader.setLocation(getClass().getResource("../fxml/modal.fxml"));
@@ -101,6 +90,7 @@ public class Controller extends java.util.Observable implements Initializable{
             e.printStackTrace();
         }
     }
+
     Model model = Model.getInstance();
     @FXML
     private CustomTextField searchText;
@@ -121,22 +111,21 @@ public class Controller extends java.util.Observable implements Initializable{
         searchText.textProperty().addListener((observable, oldValue, newValue) -> {
             if (searchText.getText().equals(""))
                 mainTable.setItems(model.getList());
-            System.out.println("textfield changed from " + oldValue + " to " + newValue);
+            //System.out.println("textfield changed from " + oldValue + " to " + newValue);
         });
 
         model.getList().addListener(new ListChangeListener<Person>() {
             @Override
             public void onChanged(Change<? extends Person> c) {
                 contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
-                mainTable.sort();
             }
         });
         mainTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 Window owner = ((Node) event.getSource()).getScene().getWindow();
-                if (event.getClickCount() == 2){
-                    selectedPerson = (Person)mainTable.getSelectionModel().getSelectedItem();
+                if (event.getClickCount() == 2) {
+                    selectedPerson = (Person) mainTable.getSelectionModel().getSelectedItem();
                     modalController.setPerson(selectedPerson);
                     openModalWindow(owner);
                     mainTable.getSelectionModel().clearSelection();
@@ -154,8 +143,8 @@ public class Controller extends java.util.Observable implements Initializable{
         });
     }
 
-    public void openModalWindow(Window owner){
-        if (stage == null){
+    public void openModalWindow(Window owner) {
+        if (stage == null) {
             stage = new Stage();
             stage.setResizable(false);
             stage.initModality(Modality.WINDOW_MODAL);
@@ -169,20 +158,20 @@ public class Controller extends java.util.Observable implements Initializable{
 
     public void allButtonsAction(ActionEvent actionEvent) {
         Window owner = ((Node) actionEvent.getSource()).getScene().getWindow();
-        try{
+        try {
             Node node = (Node) actionEvent.getSource();
             if (!(node instanceof Button)) return;//не нужная проверка, т.к. метод установлен только у кнопок
-            selectedPerson = (Person)mainTable.getSelectionModel().getSelectedItem();
+            selectedPerson = (Person) mainTable.getSelectionModel().getSelectedItem();
 
 
-            switch (node.getId()){
+            switch (node.getId()) {
                 case "addButton":
                     modalController.setPerson(new Person());
                     model.getList().add(modalController.getPerson());
                     openModalWindow(owner);
                     break;
                 case "editButton":
-                    if (selectedPerson == null){
+                    if (selectedPerson == null) {
                         DialogManager.showInfoDialog(resourceBundle.getString("key.alertTitle"),
                                 resourceBundle.getString("key.alertMessage"));
                         return;
@@ -191,7 +180,7 @@ public class Controller extends java.util.Observable implements Initializable{
                     openModalWindow(owner);
                     break;
                 case "deleteButton":
-                    if (selectedPerson == null){
+                    if (selectedPerson == null) {
                         DialogManager.showInfoDialog(resourceBundle.getString("key.alertTitle"),
                                 resourceBundle.getString("key.alertMessage"));
                         return;
@@ -199,7 +188,7 @@ public class Controller extends java.util.Observable implements Initializable{
                     Alert alert = DialogManager.showConfirmDialog(resourceBundle.getString("key.confirmTitle"),
                             resourceBundle.getString("key.confirmMessage"));
 
-                    if (alert.getResult() == ButtonType.CANCEL){
+                    if (alert.getResult() == ButtonType.CANCEL) {
                         mainTable.getSelectionModel().clearSelection();
                         return;
                     }
@@ -207,7 +196,7 @@ public class Controller extends java.util.Observable implements Initializable{
                     break;
             }
             mainTable.getSelectionModel().clearSelection();
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             System.out.println("RunTimeException have been chaught");
         }
     }
@@ -215,12 +204,12 @@ public class Controller extends java.util.Observable implements Initializable{
     public void searchAction(ActionEvent actionEvent) {
         ObservableList<Person> temp = FXCollections.observableArrayList();
         if (searchText.getText().equals("")) {
-           mainTable.setItems(model.getList());
-           return;
+            mainTable.setItems(model.getList());
+            return;
         }
-        for (Person p: model.getList()){
+        for (Person p : model.getList()) {
             if (p.getName().toLowerCase().contains(searchText.getText().toLowerCase()) ||
-                    p.getPhone().toLowerCase().contains(searchText.getText().toLowerCase())){
+                    p.getPhone().toLowerCase().contains(searchText.getText().toLowerCase())) {
                 temp.add(p);
             }
         }
@@ -230,19 +219,19 @@ public class Controller extends java.util.Observable implements Initializable{
     public void enterPressed(KeyEvent keyEvent) {
         mainTable.getSelectionModel().clearSelection();
         String name = searchText.getText();
-        for (Person p: model.getList()){
-            if(p.getName().toLowerCase().contains(name.toLowerCase())){
+        for (Person p : model.getList()) {
+            if (p.getName().toLowerCase().contains(name.toLowerCase())) {
                 mainTable.getSelectionModel().select(p);
             }
         }
     }
 
     private void setupClearButtonField(CustomTextField customTextField) {
-        try{
+        try {
             Method m = TextFields.class.getDeclaredMethod("setupClearButtonField", TextField.class, ObjectProperty.class);
             m.setAccessible(true);
             m.invoke(null, customTextField, customTextField.rightProperty());
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
