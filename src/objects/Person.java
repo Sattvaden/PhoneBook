@@ -6,13 +6,22 @@ public class Person {
 
     private SimpleStringProperty name = new SimpleStringProperty("");
     private SimpleStringProperty phone = new SimpleStringProperty("");
-
+    private int id;
     public Person() {
     }
 
-    public Person(String name, String phone) {
+    public Person(String name, String phone, int id) {
         this.name = new SimpleStringProperty(name);
         this.phone = new SimpleStringProperty(phone);
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPhone() {

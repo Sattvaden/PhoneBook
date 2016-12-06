@@ -36,7 +36,7 @@ public class Model implements PhoneBook {
                  Statement statement = connection.createStatement();
                  ResultSet resultSet = statement.executeQuery("select * from Person");) {
                 while (resultSet.next()) {
-                    list.add(new Person(resultSet.getString(2), resultSet.getString(3)));
+                    list.add(new Person(resultSet.getString(2), resultSet.getString(3), resultSet.getInt(1)));
 
                 }
             } catch (SQLException e) {
@@ -61,7 +61,7 @@ public class Model implements PhoneBook {
     public void delete(Person person) {
         try(Connection connection = SQLiteConnection.getConnection();
             Statement statement = connection.createStatement();){
-            String query = "delete from Person where id=" + (list.indexOf(person)+ 1) + ";";
+            String query = "delete from Person where name=" + "'" + person.getName() + "';";
             statement.execute(query);
             System.out.println(getList().indexOf(person)+ 1);
             list.remove(person);

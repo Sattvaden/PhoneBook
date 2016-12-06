@@ -56,14 +56,23 @@ public class ModalController implements Initializable {
         person.setPhone(phoneTextField.getText());
         ((Stage) (((Node) actionEvent.getSource()).getScene().getWindow())).close();
 
-        String insertQuery = "insert into Person (name, phone) values ('" + person.getName() + "', '" + person.getPhone() + "');";
+        int size = model.getList().size();
+        int index = model.getList().get(size - 2).getId() + 1;
+        String insertQuery = null;
         String updateQuery = "update Person set name='" + person.getName() +
-                "', phone='" + person.getPhone() + "' where id=" + (model.getList().indexOf(person) + 1) + ";";
+                "', phone='" + person.getPhone() + "' where id=" + person.getId() + ";";
 
-        if (model.getList().indexOf(person) == model.getList().size() - 1)
-            execQuery(insertQuery);
-        else
+        if (person.getId() == 0){
+            person.setId(index);
+            insertQuery = "insert into Person (id, name, phone) " +
+                    "values (" + person.getId() + ", '" + person.getName() + "', '" + person.getPhone() + "');";
+             execQuery(insertQuery);
+        }
+
+        else{
             execQuery(updateQuery);
+        }
+
     }
 
     private void execQuery(String query) {
