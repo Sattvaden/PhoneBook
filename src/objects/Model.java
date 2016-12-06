@@ -1,7 +1,7 @@
 package objects;
 
 import db.SQLiteConnection;
-import interfaces.PhoneBook;
+import interfaces.Dao;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class Model implements PhoneBook {
+public class Model implements Dao {
 
     private static Model ourInstance = new Model();
 
@@ -28,6 +28,24 @@ public class Model implements PhoneBook {
         return list;
     }
 
+    private void execQuery(String query) {
+        try (Connection connection = SQLiteConnection.getConnection();
+             Statement statement = connection.createStatement();) {
+            statement.execute(query);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public int getIndex(){
+        int index = 0;
+        for (int i = list.size(); i > 0; i--){
+            if ((index = list.get(i - 1).getId()) != 0){
+                break;
+            }
+        }
+        return index;
+    }
     public void fillList() {
         if (list == null) {
             list = FXCollections.observableArrayList();
@@ -50,11 +68,19 @@ public class Model implements PhoneBook {
     @Override
     public void add(Person person) {
         list.add(person);
+        int index = getIndex();
+        String insertQuery = null;
+            person.setId(index + 1);
+            insertQuery = "insert into Person (id, name, phone) " +
+                    "values (" + person.getId() + ", '" + person.getName() + "', '" + person.getPhone() + "');";
+            execQuery(insertQuery);
     }
 
     @Override
     public void edit(Person person) {
-
+        String updateQuery = "update Person set name='" + person.getName() +
+                "', phone='" + person.getPhone() + "' where id=" + person.getId() + ";";
+        execQuery(updateQuery);
     }
 
     @Override

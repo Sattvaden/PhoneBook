@@ -30,15 +30,6 @@ public class Main extends Application implements Observer {
 
         this.primaryStage = primaryStage;
         createGUI(LocaleManager.EN_LOCALE);
-//        loader = new FXMLLoader();
-//        loader.setLocation(getClass().getResource("../fxml/main.fxml"));
-//        loader.setResources(ResourceBundle.getBundle("bundles.Locale", new Locale("ru")));
-//        Parent root = loader.load();
-//        primaryStage.setMinWidth(330);
-//        primaryStage.setMaxHeight(520);
-//        primaryStage.setTitle(loader.getResources().getString("key.phoneBook"));
-//        primaryStage.setScene(new Scene(root, 330, 520));
-//        primaryStage.show();
     }
 
     private void createGUI(Locale locale) {

@@ -35,16 +35,26 @@ import java.util.*;
 
 public class Controller extends Observable implements Initializable {
 
+    @FXML
+    private CustomTextField searchText;
+    @FXML
+    private Label contacts;
+    @FXML
+    private TableColumn nameColumn;
+    @FXML
+    private TableColumn phoneColumn;
+    @FXML
+    private TableView mainTable;
+    @FXML
+    private ComboBox comboLocales;
+
+    Model model = Model.getInstance();
     Stage stage;
     ModalController modalController;
     FXMLLoader loader = new FXMLLoader();
     Parent modalRoot;
-
     Person selectedPerson;
-
     ResourceBundle resourceBundle;
-
-    ObservableList<Person> copy;
 
     private static final String RU_CODE = "ru";
     private static final String EN_CODE = "en";
@@ -58,7 +68,6 @@ public class Controller extends Observable implements Initializable {
         phoneColumn.setCellValueFactory(new PropertyValueFactory<Person, String>("phone"));
         model.fillList();
 
-        copy = FXCollections.observableArrayList();
         contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
         mainTable.setItems(model.getList());
         initListeners();
@@ -91,19 +100,7 @@ public class Controller extends Observable implements Initializable {
         }
     }
 
-    Model model = Model.getInstance();
-    @FXML
-    private CustomTextField searchText;
-    @FXML
-    private Label contacts;
-    @FXML
-    private TableColumn nameColumn;
-    @FXML
-    private TableColumn phoneColumn;
-    @FXML
-    private TableView mainTable;
-    @FXML
-    private ComboBox comboLocales;
+
 
 
     private void initListeners() {
@@ -120,6 +117,7 @@ public class Controller extends Observable implements Initializable {
                 contacts.setText(resourceBundle.getString("key.contacts") + ": " + model.getList().size());
             }
         });
+
         mainTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -132,6 +130,7 @@ public class Controller extends Observable implements Initializable {
                 }
             }
         });
+
         comboLocales.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -167,7 +166,6 @@ public class Controller extends Observable implements Initializable {
             switch (node.getId()) {
                 case "addButton":
                     modalController.setPerson(new Person());
-                    model.getList().add(modalController.getPerson());
                     openModalWindow(owner);
                     break;
                 case "editButton":

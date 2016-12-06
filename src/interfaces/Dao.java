@@ -3,7 +3,7 @@ package interfaces;
 
 import objects.Person;
 
-public interface PhoneBook {
+public interface Dao {
 
     void add(Person person);
 
